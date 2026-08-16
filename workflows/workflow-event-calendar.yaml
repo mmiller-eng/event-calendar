@@ -1,0 +1,37 @@
+id: 99e3d849-71d0-49db-8678-6d84e9d9159e
+name: event-calendar
+description: Generate a rolling 30-day cultural event calendar every Monday at 6am
+tags: {}
+trigger:
+  schedule: "0 6 * * 1"
+  inputs:
+    location: "Seattle, WA"
+    calendarLengthDays: 30
+inputs:
+  properties:
+    location:
+      type: string
+      description: Location to generate the calendar for
+    calendarLengthDays:
+      type: integer
+      description: Number of days ahead to include
+  required: ["location", "calendarLengthDays"]
+jobs:
+  - name: main
+    description: Run calendar generate via the event-calendar-cli model
+    steps:
+      - name: generate
+        description: Trigger calendar generate and record the output
+        task:
+          type: model_method
+          modelIdOrName: event-calendar
+          methodName: generate
+          inputs:
+            location: ${{ inputs.location }}
+            calendarLengthDays: ${{ inputs.calendarLengthDays }}
+        dependsOn: []
+        weight: 0
+        allowFailure: false
+    dependsOn: []
+    weight: 0
+version: 1
