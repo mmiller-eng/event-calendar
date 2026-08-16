@@ -1,0 +1,8 @@
+type: event-calendar-cli
+typeVersion: 2026.08.16.1
+id: 2a0a4c3f-5c67-42ba-b225-706fd2be2f3e
+name: event-calendar
+version: 1
+tags: {}
+globalArguments: {}
+methods: {}
