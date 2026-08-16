@@ -1,7 +1,0 @@
-{
-  "database": "dolt",
-  "backend": "dolt",
-  "dolt_mode": "embedded",
-  "dolt_database": "event_calendar",
-  "project_id": "2db5ab53-2851-4a00-91fa-f94f9668b846"
-}
