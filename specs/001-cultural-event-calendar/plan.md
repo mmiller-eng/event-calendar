@@ -34,7 +34,17 @@ A standalone, model-agnostic CLI agent that takes a user's cultural-event prefer
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-`.specify/memory/constitution.md` is still the unfilled template — no project-specific principles have been ratified yet. There is nothing enforceable to check against, so this gate is treated as **PASS (no-op)**. Recommendation: run `/speckit-constitution` to establish real principles (e.g., no-fabrication of event data, provider-agnostic LLM access) before this feature reaches implementation, since both are already implicit requirements in the spec (FR-008) and Technical Context above.
+Evaluated against Constitution v1.0.0 (ratified 2026-08-02). All five principles PASS; no violations to justify.
+
+| Principle | Status | Basis |
+|---|---|---|
+| I. No Fabrication | PASS | Constraints section + data-model.md `CulturalEvent` fields use `"unknown"` sentinels (FR-008); dedup rule merges rather than duplicates (FR-007) |
+| II. Provider-Agnostic Model Access | PASS | `llm/provider.py` wraps `litellm`; model selected via `EVENT_CALENDAR_MODEL` env var / `--model` flag (research.md #1) |
+| III. Plain-Files, Single-User Simplicity | PASS | Storage is `trusted_sources.yaml` + Markdown output files only; no database (research.md #4) |
+| IV. Stable CLI Text I/O Contract | PASS | `contracts/cli-contract.md` documents flags, exit codes, and output shape for `generate` and `sources list/add/remove` |
+| V. Test-Verified Filtering | PASS | `tests/unit`/`tests/integration` plan covers filtering, dedup, and rendering with mocked discovery/LLM inputs (research.md #6); each filter in data-model.md's Filtering rules needs a corresponding test at task-generation time |
+
+**Post-Phase-1 re-check**: data-model.md and contracts/cli-contract.md (already generated) were reviewed against the same table above — no drift found; still PASS.
 
 ## Project Structure
 
