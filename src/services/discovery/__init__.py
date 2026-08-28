@@ -5,7 +5,7 @@ from __future__ import annotations
 import httpx
 
 from src.config import Config
-from src.llm.provider import LLMProvider
+from src.llm.provider import LLMProvider, LLMRequestError
 from src.models.event import CulturalEvent
 from src.models.preferences import UserPreferenceSet
 from src.services.discovery import trusted_source_store
@@ -30,7 +30,7 @@ def discover_events(
         for source in sources:
             try:
                 events.extend(discover_from_trusted_source(source, provider, client=client))
-            except httpx.HTTPError:
+            except (httpx.HTTPError, LLMRequestError):
                 trusted_source_errors += 1
 
     web_search_failed = False
