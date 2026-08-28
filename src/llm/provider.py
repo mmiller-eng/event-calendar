@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 import litellm
+import openai
 
 from src.config import Config
 
@@ -38,6 +39,13 @@ class MissingConfigError(Exception):
         super().__init__(message or f"Missing required configuration: set {env_var}")
 
 
+class LLMRequestError(Exception):
+    """Raised when the LLM provider rejects or fails a completion request
+
+    (bad/invalid API key, bad model name, rate limit, connection failure, etc).
+    """
+
+
 class LLMProvider:
     def __init__(self, config: Config):
         if not config.model:
@@ -50,13 +58,16 @@ class LLMProvider:
         self._model = config.model
 
     def extract_events(self, text: str, *, source_description: str) -> list[dict]:
-        response = litellm.completion(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
-                {"role": "user", "content": f"Source: {source_description}\n\n{text}"},
-            ],
-        )
+        try:
+            response = litellm.completion(
+                model=self._model,
+                messages=[
+                    {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Source: {source_description}\n\n{text}"},
+                ],
+            )
+        except openai.APIError as exc:
+            raise LLMRequestError(str(exc)) from exc
         content = response["choices"][0]["message"]["content"]
         return _parse_json_array(content)
 

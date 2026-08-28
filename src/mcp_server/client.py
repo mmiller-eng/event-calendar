@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import AsyncExitStack
 
 from mcp import ClientSession, StdioServerParameters
@@ -17,9 +18,10 @@ class MCPClient:
         self._exit_stack = AsyncExitStack()
 
     async def connect(self) -> None:
-        server_params = StdioServerParameters(
-            command=self._command, args=self._args, env=self._env
-        )
+        # Read the environment at connect() time (not __init__ time) so callers can
+        # monkeypatch/override env vars right up until entering `async with client:`.
+        env = self._env if self._env is not None else dict(os.environ)
+        server_params = StdioServerParameters(command=self._command, args=self._args, env=env)
         stdio, write = await self._exit_stack.enter_async_context(stdio_client(server_params))
         self._session = await self._exit_stack.enter_async_context(ClientSession(stdio, write))
         await self._session.initialize()
