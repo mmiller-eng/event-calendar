@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "event-calendar": {
+      "command": "/home/maury/projects/event-calendar/.venv/bin/python",
+      "args": ["-m", "src.mcp_server.server"],
+      "cwd": "/home/maury/projects/event-calendar"
+    }
+  }
+}
