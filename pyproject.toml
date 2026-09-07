@@ -13,6 +13,8 @@ dependencies = [
     "tavily-python>=0.5",
     "python-dotenv>=1.0",
     "mcp[cli]>=1.8.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +28,7 @@ dev = [
 [project.scripts]
 calendar = "src.cli:cli"
 calendar-mcp = "src.mcp_server.server:main"
+calendar-web = "src.web_api.app:main"
 
 [build-system]
 requires = ["setuptools>=68"]

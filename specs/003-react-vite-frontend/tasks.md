@@ -8,7 +8,7 @@ description: "Task list template for feature implementation"
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/web-contract.md, quickstart.md (all present)
 
-**Tests**: Included — plan.md's Constitution Check commits this feature's own routes/views to Principle V test coverage, and quickstart.md's "Automated equivalent" section names `tests/contract/web_api_contract_test.py` and the frontend Vitest suite explicitly.
+**Tests**: Included — plan.md's Constitution Check commits this feature's own routes/views to Principle V test coverage, and quickstart.md's "Automated equivalent" section names `tests/contract/web_api_contract_test.py` and the frontend Vitest suite explicitly. Phase 6 adds Playwright (T036) as a true full-stack end-to-end layer on top of those mocked-backend suites.
 
 **Organization**: Tasks are grouped by user story (spec.md: US1 generate & view, P1; US2 manage sources, P2; US3 navigate without losing context, P3) to enable independent implementation and testing of each story.
 
@@ -28,9 +28,9 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
 
 **Purpose**: Project initialization for both the new backend package and the new frontend project
 
-- [ ] T001 Create `src/web_api/__init__.py` and empty `src/web_api/app.py`, `src/web_api/schemas.py`
-- [ ] T002 Add `fastapi>=0.115` and `uvicorn>=0.30` to `pyproject.toml` `[project.dependencies]`, and add a `calendar-web = "src.web_api.app:main"` entry under `[project.scripts]` (research.md #1, #6)
-- [ ] T003 [P] Scaffold a Vite + React + TypeScript app in `frontend/` (`package.json`, `vite.config.ts`, `tsconfig.json`, `index.html`) with `react`, `react-dom`, `react-router-dom` as dependencies (research.md #2, #4)
+- [x] T001 Create `src/web_api/__init__.py` and empty `src/web_api/app.py`, `src/web_api/schemas.py`
+- [x] T002 Add `fastapi>=0.115` and `uvicorn>=0.30` to `pyproject.toml` `[project.dependencies]`, and add a `calendar-web = "src.web_api.app:main"` entry under `[project.scripts]` (research.md #1, #6)
+- [x] T003 [P] Scaffold a Vite + React + TypeScript app in `frontend/` (`package.json`, `vite.config.ts`, `tsconfig.json`, `index.html`) with `react`, `react-dom`, `react-router-dom` as dependencies (research.md #2, #4)
 - [ ] T004 [P] Configure Vitest + React Testing Library in `frontend/` (`vitest.config.ts` or a `test` block in `vite.config.ts`, plus `frontend/tests/setup.ts`) (research.md #5)
 - [ ] T005 [P] Add an ESLint + Prettier config for `frontend/` and confirm the existing root `[tool.ruff]` config in `pyproject.toml` already covers `src/web_api/` (it should, via the existing `src*` package include)
 
@@ -133,6 +133,7 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
 - [ ] T033 [P] Add a `frontend/src/pages/GenerateView.tsx` empty/first-visit state that guides the user to submit their first request (spec.md edge case)
 - [ ] T034 [P] Update `README.md` with a "Web Frontend" section documenting `uvicorn src.web_api.app:app --reload` + `npm run dev`/`npm run build`, mirroring the existing "MCP Server" section's structure
 - [ ] T035 Run `specs/003-react-vite-frontend/quickstart.md`'s manual validation scenarios end-to-end against a real (non-mocked) backend
+- [ ] T036 [P] Add Playwright end-to-end tests automating quickstart.md's US1–US3 scenarios (generate a calendar, add/remove a source, navigate between views without a full reload) against a real running backend + built frontend, in `frontend/e2e/` (`generate.spec.ts`, `sources.spec.ts`, `navigation.spec.ts`) — complements the mocked Vitest component tests and mocked-backend contract/integration tests with one true full-stack check (depends on T015–T031 being complete)
 
 ---
 
@@ -146,7 +147,7 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
   - US1 has no dependency on US2 or US3
   - US2 has no dependency on US1 or US3
   - US3 depends on US1's `GenerateView` existing (T018) to have state to lift (T029), and on Foundational's routing (T010) — it is the one story that is not fully independent of another, by definition (it's about navigating _between_ views US1 and US2 create)
-- **Polish (Phase 6)**: Depends on all three user stories being complete
+- **Polish (Phase 6)**: Depends on all three user stories being complete; T036 (Playwright) additionally needs a real backend + built frontend running together, so it should run after T032 (production static serving) as well
 
 ### Within Each User Story
 
