@@ -47,6 +47,51 @@ calendar sources remove --url https://example-arts.org/events
 
 See `specs/001-cultural-event-calendar/quickstart.md` for full end-to-end scenarios.
 
+## MCP Server
+
+The same pipeline is also exposed as an [MCP](https://modelcontextprotocol.io) server
+over stdio, so any MCP client (Claude Code, Claude Desktop, the MCP Inspector) can call
+it directly rather than shelling out to the CLI.
+
+Run it directly:
+
+```bash
+calendar-mcp
+# equivalent to: python -m src.mcp_server.server
+```
+
+Or register it for Claude Code via `.mcp.json` (already present in this repo):
+
+```json
+{
+  "mcpServers": {
+    "event-calendar": {
+      "command": "/path/to/event-calendar/.venv/bin/python",
+      "args": ["-m", "src.mcp_server.server"],
+      "cwd": "/path/to/event-calendar"
+    }
+  }
+}
+```
+
+Inspect it interactively with the [MCP Inspector](https://github.com/modelcontextprotocol/inspector):
+
+```bash
+mcp dev src/mcp_server/server.py
+```
+
+### Tools
+
+| Tool | Description |
+|---|---|
+| `generate_calendar` | Generate a Markdown calendar for a location, applying preference filters; writes it to disk and returns the Markdown content. Same parameters as `calendar generate` (`location`, `calendar_length_days`, `max_cost`, `event_types`, `genres`, `start_after`/`start_before`, `output_path`, `model`). |
+| `list_sources` | List the configured trusted event sources. |
+| `add_source` | Add a trusted event source by `name` and `url`. |
+| `remove_source` | Remove a trusted event source by `url`. |
+
+Errors (invalid input, no sources available, LLM/provider failures) surface to the
+client as MCP tool errors with a descriptive message, rather than raw exceptions.
+
 ## Tests
 
 ```bash
