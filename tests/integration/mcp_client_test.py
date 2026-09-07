@@ -70,7 +70,8 @@ async def test_remove_source_tool(client):
 async def test_generate_calendar_tool(client, monkeypatch):
     real_env = dotenv_values(".env")
     monkeypatch.setenv("ANTHROPIC_API_KEY", real_env["ANTHROPIC_API_KEY"])
-
+    monkeypatch.setenv("TAVILY_API_KEY", real_env["TAVILY_API_KEY"])
+    
     async with client as connected:
         await connected.session().call_tool("add_source", real_source)
         result = await connected.session().call_tool(
@@ -135,18 +136,21 @@ async def test_invalid_model_key(client):
             "generate_calendar", test_generate_calendar_request
         )
         output: str = result.content[0].text
-        print(output)     
-        
+        print(output)
+
+        assert error in output
+
 @pytest.mark.integration
 async def test_no_sources(client, monkeypatch):
     error: str = "No trusted sources configured and web search is unavailable"
     real_env = dotenv_values(".env")
     monkeypatch.setenv("ANTHROPIC_API_KEY", real_env["ANTHROPIC_API_KEY"])
-    
+
     async with client as connected:
         result = await connected.session().call_tool(
             "generate_calendar", test_generate_calendar_request
         )
         output: str = result.content[0].text
+        print(output)
 
-        assert error in output  
+        assert error in output
