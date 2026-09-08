@@ -31,8 +31,8 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
 - [x] T001 Create `src/web_api/__init__.py` and empty `src/web_api/app.py`, `src/web_api/schemas.py`
 - [x] T002 Add `fastapi>=0.115` and `uvicorn>=0.30` to `pyproject.toml` `[project.dependencies]`, and add a `calendar-web = "src.web_api.app:main"` entry under `[project.scripts]` (research.md #1, #6)
 - [x] T003 [P] Scaffold a Vite + React + TypeScript app in `frontend/` (`package.json`, `vite.config.ts`, `tsconfig.json`, `index.html`) with `react`, `react-dom`, `react-router-dom` as dependencies (research.md #2, #4)
-- [ ] T004 [P] Configure Vitest + React Testing Library in `frontend/` (`vitest.config.ts` or a `test` block in `vite.config.ts`, plus `frontend/tests/setup.ts`) (research.md #5)
-- [ ] T005 [P] Add an ESLint + Prettier config for `frontend/` and confirm the existing root `[tool.ruff]` config in `pyproject.toml` already covers `src/web_api/` (it should, via the existing `src*` package include)
+- [x] T004 [P] Configure Vitest + React Testing Library in `frontend/` (`vitest.config.ts` or a `test` block in `vite.config.ts`, plus `frontend/tests/setup.ts`) (research.md #5)
+- [x] T005 [P] Add an ESLint + Prettier config for `frontend/` and confirm the existing root `[tool.ruff]` config in `pyproject.toml` already covers `src/web_api/` (it should, via the existing `src*` package include)
 
 **Checkpoint**: Both `src/web_api/` and `frontend/` exist as buildable, lintable, empty projects
 
