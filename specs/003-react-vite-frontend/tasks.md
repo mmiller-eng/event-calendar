@@ -47,9 +47,9 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
 - [x] T006 Implement `GenerateRequest`, `EventSummary`, `CalendarResponse`, and `SourceResponse` pydantic models in `src/web_api/schemas.py` (data-model.md)
 - [x] T007 Create the FastAPI app instance in `src/web_api/app.py`, with CORS middleware restricted to the frontend's own origin (dev-server origin in development; same-origin in production) — no wildcard (research.md #3)
 - [x] T008 Implement shared error handling in `src/web_api/app.py`: map `DiscoveryUnavailableError` → 503, invalid-URL/validation failures → 422, remove-not-found → 404, each with the plain-language message body defined in `contracts/web-contract.md` (depends on T006, T007)
-- [ ] T009 [P] Create `frontend/src/api/client.ts`: a typed fetch wrapper exposing `generateCalendar(req: GenerateRequest)`, `listSources()`, `addSource(...)`, `removeSource(url)`, with TypeScript types mirroring `src/web_api/schemas.py` (data-model.md)
-- [ ] T010 [P] Create `frontend/src/App.tsx` with `react-router-dom` routes for `/` and `/sources` (empty placeholder pages for now) plus a catch-all not-found route (contracts/web-contract.md frontend route table)
-- [ ] T011 Create `frontend/src/main.tsx` entrypoint wrapping `<App/>` in `<BrowserRouter>` and mounting it
+- [x] T009 [P] Create `frontend/src/api/client.ts`: a typed fetch wrapper exposing `generateCalendar(req: GenerateRequest)`, `listSources()`, `addSource(...)`, `removeSource(url)`, with TypeScript types mirroring `src/web_api/schemas.py` (data-model.md)
+- [x] T010 [P] Create `frontend/src/App.tsx` with `react-router-dom` routes for `/` and `/sources` (empty placeholder pages for now) plus a catch-all not-found route (contracts/web-contract.md frontend route table)
+- [x] T011 Create `frontend/src/main.tsx` entrypoint wrapping `<App/>` in `<BrowserRouter>` and mounting it
 
 **Checkpoint**: Foundation ready — backend has a running, error-handling-aware FastAPI app with schemas; frontend has routing and an API client. User story implementation can now begin.
 
