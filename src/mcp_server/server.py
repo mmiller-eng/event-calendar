@@ -16,12 +16,13 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import BaseModel, Field, ValidationError
 
-from src.config import load_config
+from src.config import Config, load_config
 from src.llm.provider import LLMProvider, MissingConfigError
 from src.models.calendar import MarkdownCalendar
 from src.models.preferences import UserPreferenceSet
 from src.services import dedup, filtering, markdown
 from src.services.discovery import DiscoveryUnavailableError, discover_events, trusted_source_store
+from src.utils import default_output_path
 
 mcp = MCPServer("EventCalendar", log_level="ERROR")
 
@@ -88,7 +89,7 @@ def generate_calendar(
         start_time_window=start_time_window,
     )
 
-    config = load_config(model_override=model)
+    config: Config = load_config(model_override=model)
 
     try:
         provider = LLMProvider(config)
@@ -117,7 +118,7 @@ def generate_calendar(
     rendered = markdown.render_markdown(calendar)
 
     resolved_output = (
-        Path(output_path) if output_path else _default_output_path(calendar.generated_at)
+        Path(output_path) if output_path else default_output_path(config, calendar.generated_at)
     )
     resolved_output.parent.mkdir(parents=True, exist_ok=True)
     resolved_output.write_text(rendered, encoding="utf-8")
@@ -160,10 +161,6 @@ def remove_source(
         raise ToolError(f"No trusted source found for url: {url}")
     trusted_source_store.remove_source(config.trusted_sources_path, url=url)
     return SourceResult(name=match.name, url=str(match.url), added_at=match.added_at.isoformat())
-
-
-def _default_output_path(generated_at: datetime) -> Path:
-    return Path("calendars") / f"{generated_at.date().isoformat()}.md"
 
 
 def _parse_start_time_window(

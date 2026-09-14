@@ -12,7 +12,6 @@ import threading
 from datetime import datetime
 from datetime import time as time_cls
 from decimal import Decimal
-from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
@@ -20,13 +19,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from src.config import load_config
+from src.config import Config, load_config
 from src.llm.provider import LLMProvider, MissingConfigError
 from src.models.calendar import MarkdownCalendar
 from src.models.preferences import UserPreferenceSet
 from src.services import dedup, filtering
 from src.services.discovery import DiscoveryUnavailableError, discover_events
 from src.services.markdown import _render_cost, render_markdown
+from src.utils import default_output_path
 from src.web_api.schemas import CalendarResponse, EventSummary, GenerateRequest
 
 # The Vite dev server's default origin; overridable for a non-default port.
@@ -87,10 +87,6 @@ def _parse_start_time_window(
         ) from exc
 
 
-def _default_output_path(generated_at: datetime) -> Path:
-    return Path("calendars") / f"{generated_at.date().isoformat()}.md"
-
-
 @app.post("/api/calendar")
 def generate_calendar(req: GenerateRequest) -> CalendarResponse:
     if not _generation_lock.acquire(blocking=False):
@@ -107,7 +103,7 @@ def generate_calendar(req: GenerateRequest) -> CalendarResponse:
             start_time_window=_parse_start_time_window(req.start_after, req.start_before),
         )
 
-        config = load_config(model_override=req.model)
+        config: Config = load_config(model_override=req.model)
 
         try:
             provider = LLMProvider(config)
@@ -125,7 +121,7 @@ def generate_calendar(req: GenerateRequest) -> CalendarResponse:
             events=matched,
         )
 
-        output_path = _default_output_path(calendar.generated_at)
+        output_path = default_output_path(config, calendar.generated_at)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(render_markdown(calendar), encoding="utf-8")
 

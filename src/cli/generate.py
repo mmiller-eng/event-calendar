@@ -9,12 +9,13 @@ from pathlib import Path
 
 import click
 
-from src.config import load_config
+from src.config import Config, load_config
 from src.llm.provider import LLMProvider, MissingConfigError
 from src.models.calendar import MarkdownCalendar
 from src.models.preferences import UserPreferenceSet
 from src.services import dedup, filtering, markdown
 from src.services.discovery import DiscoveryUnavailableError, discover_events
+from src.utils import default_output_path
 
 
 @click.command("generate")
@@ -59,7 +60,7 @@ def generate(
         click.echo(f"Error: {exc}", err=True)
         ctx.exit(2)
 
-    config = load_config(model_override=model)
+    config: Config = load_config(model_override=model)
 
     try:
         provider = LLMProvider(config)
@@ -89,15 +90,11 @@ def generate(
         most_restrictive_filter=restrictive_note,
     )
 
-    resolved_output = output_path or _default_output_path(calendar.generated_at)
+    resolved_output = output_path or default_output_path(config, calendar.generated_at)
     resolved_output.parent.mkdir(parents=True, exist_ok=True)
     resolved_output.write_text(markdown.render_markdown(calendar), encoding="utf-8")
 
     click.echo(str(resolved_output))
-
-
-def _default_output_path(generated_at: datetime) -> Path:
-    return Path("calendars") / f"{generated_at.date().isoformat()}.md"
 
 
 def _parse_start_time_window(
