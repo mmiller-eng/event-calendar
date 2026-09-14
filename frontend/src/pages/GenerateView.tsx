@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import type { SubmitEvent } from 'react'
+import { generateCalendar } from '../api/client'
+import type { CalendarResponse, GenerateRequest } from '../api/client'
 
-// Local, string-based form state -- T018 converts this into a typed
-// GenerateRequest and wires the actual submit/loading/result behavior.
+// Local, string-based form state -- converted into a typed GenerateRequest
+// on submit.
 interface FormState {
   location: string
   calendarLengthDays: string
@@ -25,15 +27,48 @@ const initialFormState: FormState = {
   model: '',
 }
 
+function parseList(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+}
+
+function eventKey(event: CalendarResponse['events'][number]): string {
+  return `${event.name}|${event.date}|${event.venue}`
+}
+
 export default function GenerateView() {
   const [form, setForm] = useState<FormState>(initialFormState)
+  const [isPending, setIsPending] = useState(false)
+  const [result, setResult] = useState<CalendarResponse | null>(null)
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    const request: GenerateRequest = {
+      location: form.location,
+      calendar_length_days: Number(form.calendarLengthDays),
+      max_cost: form.maxCost === '' ? null : Number(form.maxCost),
+      event_types: parseList(form.eventTypes),
+      genres: parseList(form.genres),
+      start_after: form.startAfter === '' ? null : form.startAfter,
+      start_before: form.startBefore === '' ? null : form.startBefore,
+      model: form.model === '' ? null : form.model,
+    }
+
+    setIsPending(true)
+    setResult(null)
+    try {
+      const response = await generateCalendar(request)
+      setResult(response)
+    } finally {
+      setIsPending(false)
+    }
   }
 
   return (
@@ -125,8 +160,25 @@ export default function GenerateView() {
           />
         </div>
 
-        <button type="submit">Generate</button>
+        <button type="submit" disabled={isPending}>
+          Generate
+        </button>
       </form>
+
+      {isPending && <p role="status">Generating…</p>}
+
+      {!isPending && result && result.event_count === 0 && <p>No events matched.</p>}
+
+      {!isPending && result && result.event_count > 0 && (
+        <ul>
+          {result.events.map((event) => (
+            <li key={eventKey(event)}>
+              <strong>{event.name}</strong> — {event.date} {event.start_time} — {event.venue} —{' '}
+              {event.cost}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
