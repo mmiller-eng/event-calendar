@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { SubmitEvent } from 'react'
-import { generateCalendar } from '../api/client'
+import { ApiError, generateCalendar } from '../api/client'
 import type { CalendarResponse, GenerateRequest } from '../api/client'
 
 // Local, string-based form state -- converted into a typed GenerateRequest
@@ -42,6 +42,7 @@ export default function GenerateView() {
   const [form, setForm] = useState<FormState>(initialFormState)
   const [isPending, setIsPending] = useState(false)
   const [result, setResult] = useState<CalendarResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -63,9 +64,12 @@ export default function GenerateView() {
 
     setIsPending(true)
     setResult(null)
+    setError(null)
     try {
       const response = await generateCalendar(request)
       setResult(response)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
     } finally {
       setIsPending(false)
     }
@@ -166,6 +170,8 @@ export default function GenerateView() {
       </form>
 
       {isPending && <p role="status">Generating…</p>}
+
+      {!isPending && error && <p role="alert">{error}</p>}
 
       {!isPending && result && result.event_count === 0 && <p>No events matched.</p>}
 
