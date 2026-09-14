@@ -67,7 +67,7 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
 
 - [x] T012 [P] [US1] Contract test for `POST /api/calendar` (200 success, `event_count: 0` case, 422 invalid body, 503 no-sources-reachable) in `tests/contract/web_api_contract_test.py`
 - [x] T013 [P] [US1] Integration test for the full generate flow, with mocked discovery/LLM inputs, in `tests/integration/web_api_test.py`
-- [ ] T014 [P] [US1] Component test for `GenerateView`'s loading, result, and "no events matched" states in `frontend/tests/GenerateView.test.tsx`
+- [x] T014 [P] [US1] Component test for `GenerateView`'s loading, result, and "no events matched" states in `frontend/tests/GenerateView.test.tsx`
 
 ### Implementation for User Story 1
 
