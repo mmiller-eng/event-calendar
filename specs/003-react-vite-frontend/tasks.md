@@ -71,7 +71,7 @@ Per plan.md's Structure Decision: backend lives inside the existing `src/` tree 
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Implement `POST /api/calendar` in `src/web_api/app.py`: validate `GenerateRequest`, call the existing `discover_events`/`filter_events`/`dedup_events`/render pipeline in-process, write the Markdown file, return `CalendarResponse` (depends on T006–T008)
+- [x] T015 [US1] Implement `POST /api/calendar` in `src/web_api/app.py`: validate `GenerateRequest`, call the existing `discover_events`/`filter_events`/`dedup_events`/render pipeline in-process, write the Markdown file, return `CalendarResponse` (depends on T006–T008)
 - [ ] T016 [US1] Add a per-session in-progress guard to `POST /api/calendar` that returns 409 if a generation request is already running for the same session (spec.md edge case; contracts/web-contract.md)
 - [ ] T017 [P] [US1] Create `frontend/src/pages/GenerateView.tsx`: a form for `location`, `calendar_length_days`, `max_cost`, `event_types`, `genres`, `start_after`/`start_before`, `model`
 - [ ] T018 [US1] Wire `GenerateView`'s submit handler to `client.ts`'s `generateCalendar`; render an in-progress indicator while pending, the returned `events` list (date/time/venue/cost) on success, and the explicit "no events matched" state when `event_count` is 0 (depends on T017, T009)
