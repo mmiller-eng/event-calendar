@@ -8,6 +8,7 @@ web frontend gets identical results and identical error categories.
 from __future__ import annotations
 
 import os
+import threading
 from datetime import datetime
 from datetime import time as time_cls
 from decimal import Decimal
@@ -45,6 +46,13 @@ app.add_middleware(
 
 class SourceNotFoundError(Exception):
     """Raised by a route handler when a remove-target URL isn't on the trusted-source list."""
+
+
+# Single-user, single-session tool (Principle III, plan.md Scale/Scope) — a plain
+# lock is enough to reject a second concurrent generation request (spec.md edge
+# case). Sync route handlers run in FastAPI's threadpool, so this must be a real
+# lock, not a bare boolean flag (check-then-set would race between threads).
+_generation_lock = threading.Lock()
 
 
 @app.exception_handler(DiscoveryUnavailableError)
@@ -85,59 +93,68 @@ def _default_output_path(generated_at: datetime) -> Path:
 
 @app.post("/api/calendar")
 def generate_calendar(req: GenerateRequest) -> CalendarResponse:
-    preferences = UserPreferenceSet(
-        location=req.location,
-        calendar_length_days=req.calendar_length_days,
-        max_cost=Decimal(str(req.max_cost)) if req.max_cost is not None else None,
-        event_types=req.event_types,
-        genres=req.genres,
-        start_time_window=_parse_start_time_window(req.start_after, req.start_before),
-    )
-
-    config = load_config(model_override=req.model)
-
-    try:
-        provider = LLMProvider(config)
-    except MissingConfigError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-
-    candidates = discover_events(preferences, config, provider)
-
-    deduped = dedup.dedup_events(candidates)
-    matched = filtering.filter_events(deduped, preferences)
-
-    calendar = MarkdownCalendar(
-        preferences=preferences,
-        generated_at=datetime.now(),
-        events=matched,
-    )
-
-    output_path = _default_output_path(calendar.generated_at)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(render_markdown(calendar), encoding="utf-8")
-
-    events = [
-        EventSummary(
-            name=event.name,
-            date=event.date.isoformat(),
-            start_time=(
-                "unknown" if event.start_time == "unknown" else event.start_time.strftime("%H:%M")
-            ),
-            venue=event.venue,
-            cost=_render_cost(event.cost),
-            event_type=event.event_type,
-            genre=None if event.genre in (None, "unknown") else event.genre,
-            source_url=event.source_ref.identifier,
+    if not _generation_lock.acquire(blocking=False):
+        raise HTTPException(
+            status_code=409, detail="A generation request is already in progress."
         )
-        for event in matched
-    ]
+    try:
+        preferences = UserPreferenceSet(
+            location=req.location,
+            calendar_length_days=req.calendar_length_days,
+            max_cost=Decimal(str(req.max_cost)) if req.max_cost is not None else None,
+            event_types=req.event_types,
+            genres=req.genres,
+            start_time_window=_parse_start_time_window(req.start_after, req.start_before),
+        )
 
-    return CalendarResponse(
-        output_path=str(output_path),
-        generated_at=calendar.generated_at.isoformat(),
-        events=events,
-        event_count=len(events),
-    )
+        config = load_config(model_override=req.model)
+
+        try:
+            provider = LLMProvider(config)
+        except MissingConfigError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        candidates = discover_events(preferences, config, provider)
+
+        deduped = dedup.dedup_events(candidates)
+        matched = filtering.filter_events(deduped, preferences)
+
+        calendar = MarkdownCalendar(
+            preferences=preferences,
+            generated_at=datetime.now(),
+            events=matched,
+        )
+
+        output_path = _default_output_path(calendar.generated_at)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(render_markdown(calendar), encoding="utf-8")
+
+        events = [
+            EventSummary(
+                name=event.name,
+                date=event.date.isoformat(),
+                start_time=(
+                    "unknown"
+                    if event.start_time == "unknown"
+                    else event.start_time.strftime("%H:%M")
+                ),
+                venue=event.venue,
+                cost=_render_cost(event.cost),
+                event_type=event.event_type,
+                genre=None if event.genre in (None, "unknown") else event.genre,
+                source_url=event.source_ref.identifier,
+            )
+            for event in matched
+        ]
+
+        return CalendarResponse(
+            output_path=str(output_path),
+            generated_at=calendar.generated_at.isoformat(),
+            events=events,
+            event_count=len(events),
+        )
+    finally:
+        _generation_lock.release()
 
 
 def main() -> None:
