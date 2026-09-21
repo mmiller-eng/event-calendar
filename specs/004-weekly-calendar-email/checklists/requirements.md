@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Weekly Scheduled Calendar Email
+# Specification Quality Checklist: Scheduled Calendar Email
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-09-14

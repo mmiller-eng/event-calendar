@@ -29,6 +29,7 @@ dev = [
 calendar = "src.cli:cli"
 calendar-mcp = "src.mcp_server.server:main"
 calendar-web = "src.web_api.app:main"
+calendar-scheduled-job = "src.scheduled_job.main:main"
 
 [build-system]
 requires = ["setuptools>=68"]

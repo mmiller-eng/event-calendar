@@ -1,4 +1,4 @@
-# Quickstart: Weekly Scheduled Calendar Email
+# Quickstart: Scheduled Calendar Email
 
 Validation guide for this feature once implemented. Full environment
 variable / behavior detail lives in
@@ -22,32 +22,32 @@ duplicated here.
 ## Run it locally (without Docker)
 
 ```bash
-export WEEKLY_RECIPE_LOCATION="Seattle, WA"
-export WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS=14
-export WEEKLY_RECIPIENT_EMAIL="you@example.com"
+export RECIPE_LOCATION="Seattle, WA"
+export RECIPE_CALENDAR_LENGTH_DAYS=14
+export RECIPIENT_EMAIL="you@example.com"
 export SMTP_HOST=localhost
 export SMTP_PORT=1025
 export SMTP_FROM_ADDRESS="calendar@example.com"
 
-.venv/bin/calendar-weekly-email
+.venv/bin/calendar-scheduled-job
 ```
 
 ## Run the built container
 
 ```bash
-docker build -t event-calendar-weekly .
+docker build -t event-calendar-scheduled .
 docker run --rm \
-  -e WEEKLY_RECIPE_LOCATION="Seattle, WA" \
-  -e WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS=14 \
-  -e WEEKLY_RECIPIENT_EMAIL="you@example.com" \
+  -e RECIPE_LOCATION="Seattle, WA" \
+  -e RECIPE_CALENDAR_LENGTH_DAYS=14 \
+  -e RECIPIENT_EMAIL="you@example.com" \
   -e SMTP_HOST=host.docker.internal -e SMTP_PORT=1025 \
   -e SMTP_FROM_ADDRESS="calendar@example.com" \
   -e EVENT_CALENDAR_MODEL="anthropic/claude-sonnet-5" \
   -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
-  event-calendar-weekly
+  event-calendar-scheduled
 ```
 
-## Validate User Story 1 — automated weekly email (P1)
+## Validate User Story 1 — automated email (P1)
 
 1. With at least one trusted source baked into the image (or
    `TAVILY_API_KEY` set), run the entrypoint as above.
@@ -57,7 +57,7 @@ docker run --rm \
 3. Re-run with a recipe unlikely to match anything.
    **Expect**: subject `... (no events found)`, body explicitly states no
    events matched — not an empty body.
-4. Change `WEEKLY_RECIPIENT_EMAIL` and re-run.
+4. Change `RECIPIENT_EMAIL` and re-run.
    **Expect**: the email is addressed to the new recipient, not the
    previous one.
 
@@ -69,13 +69,13 @@ docker run --rm \
    containing "No trusted sources configured and web search is
    unavailable." — the same message the CLI/MCP/web interfaces already
    produce for this condition.
-2. Unset a required variable (e.g. `WEEKLY_RECIPE_LOCATION`) and run.
+2. Unset a required variable (e.g. `RECIPE_LOCATION`) and run.
    **Expect**: one failure email still arrives, explaining what's missing —
    not a silent crash with no email at all.
 
 ## Validate User Story 3 — config-only recipe changes (P3)
 
-1. Change `WEEKLY_RECIPE_LOCATION` (or `WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS`)
+1. Change `RECIPE_LOCATION` (or `RECIPE_CALENDAR_LENGTH_DAYS`)
    and re-run without touching any code.
    **Expect**: the next run's email reflects the new location/length —
    confirms the recipe is genuinely just configuration, not hardcoded.
