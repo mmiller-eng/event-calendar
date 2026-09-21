@@ -1,4 +1,4 @@
-# Phase 1 Data Model: Weekly Scheduled Calendar Email
+# Phase 1 Data Model: Scheduled Calendar Email
 
 This feature introduces no changes to how events are discovered, filtered,
 or rendered. It reuses `TrustedSource`, `CulturalEvent`, `MarkdownCalendar`,
@@ -8,7 +8,7 @@ and `UserPreferenceSet` exactly as defined in
 What it adds are the shapes needed to get from environment variables to a
 pipeline call, and from a pipeline result to an email.
 
-## WeeklyRecipe (new)
+## Recipe (new)
 
 Built by `src/scheduled_job/recipe.py` from environment variables; converted
 directly into a `UserPreferenceSet` (001's data-model.md) before calling the
@@ -17,12 +17,12 @@ from for this trigger.
 
 | Field | Source env var | Type | Notes |
 |---|---|---|---|
-| `location` | `WEEKLY_RECIPE_LOCATION` | `str` | Required |
-| `calendar_length_days` | `WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS` | `int` | Required, > 0 |
-| `max_cost` | `WEEKLY_RECIPE_MAX_COST` | `Decimal \| None` | Optional; `0` = free only; unset = no ceiling |
-| `event_types` | `WEEKLY_RECIPE_EVENT_TYPES` | `list[str]` | Optional, comma-separated; unset = all types |
-| `genres` | `WEEKLY_RECIPE_GENRES` | `list[str]` | Optional, comma-separated; applies only to music |
-| `start_time_window` | `WEEKLY_RECIPE_START_AFTER` / `WEEKLY_RECIPE_START_BEFORE` | `tuple[time, time] \| None` | Both-or-neither, `HH:MM`, same rule as the other three interfaces |
+| `location` | `RECIPE_LOCATION` | `str` | Required |
+| `calendar_length_days` | `RECIPE_CALENDAR_LENGTH_DAYS` | `int` | Required, > 0 |
+| `max_cost` | `RECIPE_MAX_COST` | `Decimal \| None` | Optional; `0` = free only; unset = no ceiling |
+| `event_types` | `RECIPE_EVENT_TYPES` | `list[str]` | Optional, comma-separated; unset = all types |
+| `genres` | `RECIPE_GENRES` | `list[str]` | Optional, comma-separated; applies only to music |
+| `start_time_window` | `RECIPE_START_AFTER` / `RECIPE_START_BEFORE` | `tuple[time, time] \| None` | Both-or-neither, `HH:MM`, same rule as the other three interfaces |
 
 **Validation**: identical rules to `UserPreferenceSet` — `calendar_length_days`
 must be positive; an incomplete start-window pair is rejected. Unlike the
@@ -32,12 +32,12 @@ same failure-email path as a pipeline error (contracts/scheduled-job-contract.md
 
 ## EmailDeliveryConfig (new)
 
-Built by `src/scheduled_job/recipe.py` alongside `WeeklyRecipe`; not part of
+Built by `src/scheduled_job/recipe.py` alongside `Recipe`; not part of
 `UserPreferenceSet` — this configures *delivery*, not *generation*.
 
 | Field | Source env var | Type | Notes |
 |---|---|---|---|
-| `recipient_email` | `WEEKLY_RECIPIENT_EMAIL` | `str` | Required |
+| `recipient_email` | `RECIPIENT_EMAIL` | `str` | Required |
 | `smtp_host` | `SMTP_HOST` | `str` | Required |
 | `smtp_port` | `SMTP_PORT` | `int` | Required |
 | `smtp_username` | `SMTP_USERNAME` | `str \| None` | Optional — some relays allow unauthenticated/IP-allowlisted sending |

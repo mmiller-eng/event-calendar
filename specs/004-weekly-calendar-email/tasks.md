@@ -2,7 +2,7 @@
 description: "Task list template for feature implementation"
 ---
 
-# Tasks: Weekly Scheduled Calendar Email
+# Tasks: Scheduled Calendar Email
 
 **Input**: Design documents from `/specs/004-weekly-calendar-email/`
 
@@ -10,7 +10,7 @@ description: "Task list template for feature implementation"
 
 **Tests**: Included — plan.md's Constitution Check commits this feature's own recipe/email logic to Principle V test coverage, and quickstart.md's "Automated equivalent" section names `tests/unit/test_email_delivery.py` and `tests/integration/test_scheduled_job.py` explicitly.
 
-**Organization**: Tasks are grouped by user story (spec.md: US1 automated weekly email, P1; US2 failure notification, P2; US3 config-only recipe updates, P3) to enable independent implementation and testing of each story.
+**Organization**: Tasks are grouped by user story (spec.md: US1 automated email, P1; US2 failure notification, P2; US3 config-only recipe updates, P3) to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -29,7 +29,7 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 **Purpose**: Project initialization for the new package and its container packaging
 
 - [x] T001 Create `src/scheduled_job/__init__.py` and empty `src/scheduled_job/main.py`, `src/scheduled_job/recipe.py`, `src/scheduled_job/email_delivery.py`
-- [ ] T002 Add a `calendar-weekly-email = "src.scheduled_job.main:main"` entry under `[project.scripts]` in `pyproject.toml` — no new Python dependencies needed, email delivery uses the standard library (research.md #3)
+- [x] T002 Add a `calendar-scheduled-job = "src.scheduled_job.main:main"` entry under `[project.scripts]` in `pyproject.toml` — no new Python dependencies needed, email delivery uses the standard library (research.md #3)
 - [ ] T003 [P] Create a `Dockerfile` at the repo root: `python:3.11-slim` base, installs the project, `ENTRYPOINT ["python", "-m", "src.scheduled_job.main"]`, no exposed port (research.md #2; contracts/scheduled-job-contract.md)
 - [ ] T004 [P] Confirm the existing root `[tool.ruff]` config in `pyproject.toml` already covers `src/scheduled_job/` (it should, via the existing `src*` package include)
 
@@ -43,15 +43,15 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Implement `WeeklyRecipe` and `EmailDeliveryConfig` construction from environment variables in `src/scheduled_job/recipe.py`, including validation (positive `calendar_length_days`, complete `WEEKLY_RECIPE_START_AFTER`/`WEEKLY_RECIPE_START_BEFORE` pair) — a validation failure is treated as a run failure, not raised to a caller (data-model.md; contracts/scheduled-job-contract.md step 1)
+- [ ] T005 [P] Implement `Recipe` and `EmailDeliveryConfig` construction from environment variables in `src/scheduled_job/recipe.py`, including validation (positive `calendar_length_days`, complete `RECIPE_START_AFTER`/`RECIPE_START_BEFORE` pair) — a validation failure is treated as a run failure, not raised to a caller (data-model.md; contracts/scheduled-job-contract.md step 1)
 - [ ] T006 [P] Implement `RunOutcome` → subject/body mapping (the three email shapes: events found, zero events, failure) and SMTP sending via `smtplib`/`email.message.EmailMessage` in `src/scheduled_job/email_delivery.py` (data-model.md `RunOutcome`; contracts/scheduled-job-contract.md's Email content contract)
-- [ ] T007 Implement `src/scheduled_job/main.py`'s entrypoint: build the recipe/config via T005 (catching its validation failures), wrap the pipeline call in `try`/`except` for `DiscoveryUnavailableError`/`MissingConfigError`, always call `email_delivery.send(...)` (T006) exactly once, exit `0`/non-zero per contracts/scheduled-job-contract.md step 6; includes `main()`/`if __name__ == "__main__"` for the `calendar-weekly-email` console script (depends on T005, T006) — the actual pipeline call itself is wired in T010 (US1)
+- [ ] T007 Implement `src/scheduled_job/main.py`'s entrypoint: build the recipe/config via T005 (catching its validation failures), wrap the pipeline call in `try`/`except` for `DiscoveryUnavailableError`/`MissingConfigError`, always call `email_delivery.send(...)` (T006) exactly once, exit `0`/non-zero per contracts/scheduled-job-contract.md step 6; includes `main()`/`if __name__ == "__main__"` for the `calendar-scheduled-job` console script (depends on T005, T006) — the actual pipeline call itself is wired in T010 (US1)
 
 **Checkpoint**: Foundation ready — recipe parsing, email formatting/sending, and the entrypoint's error-handling shape all exist; the pipeline call itself is still a stub. User story implementation can now begin.
 
 ---
 
-## Phase 3: User Story 1 - Receive a weekly calendar by email automatically (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - Receive a calendar by email automatically (Priority: P1) 🎯 MVP
 
 **Goal**: A real scheduled run generates a calendar and emails it to the configured recipient.
 
@@ -93,7 +93,7 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 
 ---
 
-## Phase 5: User Story 3 - Update the weekly recipe without a code change (Priority: P3)
+## Phase 5: User Story 3 - Update the recipe without a code change (Priority: P3)
 
 **Goal**: An operator can change the location, calendar length, or recipient purely through deployment configuration.
 
@@ -101,7 +101,7 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 
 ### Tests for User Story 3
 
-- [ ] T016 [P] [US3] Integration test confirming a changed `WEEKLY_RECIPE_LOCATION`/`WEEKLY_RECIPIENT_EMAIL` (env vars only, no code change) changes the next run's generated location/recipient, in `tests/integration/test_scheduled_job.py`
+- [ ] T016 [P] [US3] Integration test confirming a changed `RECIPE_LOCATION`/`RECIPIENT_EMAIL` (env vars only, no code change) changes the next run's generated location/recipient, in `tests/integration/test_scheduled_job.py`
 
 ### Implementation for User Story 3
 
@@ -115,7 +115,7 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 
 **Purpose**: Deployment readiness and documentation
 
-- [ ] T018 [P] Add a "Scheduled Weekly Email" section to the root `README.md` documenting local run (`calendar-weekly-email`), Docker build/run, and the required environment variables — mirroring the existing "MCP Server"/"Web Frontend" sections' structure
+- [ ] T018 [P] Add a "Scheduled Calendar Email" section to the root `README.md` documenting local run (`calendar-scheduled-job`), Docker build/run, and the required environment variables — mirroring the existing "MCP Server"/"Web Frontend" sections' structure
 - [ ] T019 [P] Add a `.dockerignore` at the repo root (excludes `.venv/`, `frontend/node_modules/`, `calendars/`, `.git/`, `specs/`, test caches) to keep the built image lean
 - [ ] T020 [P] Add `deploy/README.md`: a one-time `gcloud` bootstrap runbook covering the Artifact Registry repository, the Cloud Run Job itself, its weekly Cloud Scheduler trigger, the Secret Manager secrets for the LLM provider key and SMTP credentials, and the Workload Identity Federation pool/provider + service account T022's workflow authenticates as (research.md #7) — a runbook run once (or whenever the infrastructure itself changes), not committed infrastructure-as-code
 - [ ] T021 Run `specs/004-weekly-calendar-email/quickstart.md`'s manual validation scenarios end-to-end against a real local SMTP debug server

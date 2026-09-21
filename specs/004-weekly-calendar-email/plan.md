@@ -1,4 +1,4 @@
-# Implementation Plan: Weekly Scheduled Calendar Email
+# Implementation Plan: Scheduled Calendar Email
 
 **Branch**: `004-weekly-calendar-email` | **Date**: 2026-09-14 | **Spec**: [spec.md](./spec.md)
 

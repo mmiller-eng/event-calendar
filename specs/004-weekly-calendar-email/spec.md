@@ -1,4 +1,4 @@
-# Feature Specification: Weekly Scheduled Calendar Email
+# Feature Specification: Scheduled Calendar Email
 
 **Feature Branch**: `004-weekly-calendar-email`
 
@@ -10,7 +10,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Receive a weekly calendar by email automatically (Priority: P1)
+### User Story 1 - Receive a calendar by email automatically (Priority: P1)
 
 An operator configures a location, calendar length, and recipient email address once. From then on, every week, without anyone manually running anything, a freshly generated cultural event calendar for that location arrives by email.
 
@@ -41,7 +41,7 @@ An operator is told, by email, when a scheduled run couldn't produce a calendar 
 
 ---
 
-### User Story 3 - Update the weekly recipe without a code change (Priority: P3)
+### User Story 3 - Update the recipe without a code change (Priority: P3)
 
 An operator changes the configured location, calendar length, or recipient email through deployment configuration, not by editing and redeploying application code.
 
@@ -80,7 +80,7 @@ An operator changes the configured location, calendar length, or recipient email
 
 ### Key Entities
 
-- **Weekly Generation Recipe** (new): the preconfigured preferences for a scheduled run — location, calendar length, and any of the same optional filters (cost ceiling, event types, genres, start-time window) already defined by the reused User Preference Set ([001-cultural-event-calendar/data-model.md](../001-cultural-event-calendar/data-model.md)). Not a new set of fields, just a preconfigured instance of the existing ones.
+- **Generation Recipe** (new): the preconfigured preferences for a scheduled run — location, calendar length, and any of the same optional filters (cost ceiling, event types, genres, start-time window) already defined by the reused User Preference Set ([001-cultural-event-calendar/data-model.md](../001-cultural-event-calendar/data-model.md)). Not a new set of fields, just a preconfigured instance of the existing ones.
 - **Trusted Event Source**, **Cultural Event**, **Generated Calendar**: reused exactly as already defined in 001 — this feature introduces no changes to how events are discovered, filtered, or rendered.
 - **Scheduled Run Notification** (new, conceptual): the outcome of one scheduled run as delivered by email — either the generated calendar's content or a plain-language failure explanation.
 

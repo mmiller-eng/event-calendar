@@ -1,4 +1,4 @@
-# Phase 0 Research: Weekly Scheduled Calendar Email
+# Phase 0 Research: Scheduled Calendar Email
 
 This feature does not yet exist in the codebase — the decisions below are
 proposed, not verified against shipped code, resolving every open question
@@ -86,9 +86,9 @@ for a single outbound email a week).
 ## 4. Recipe & delivery configuration: new env vars, read directly by the module
 
 **Decision**: `src/scheduled_job/recipe.py` reads its own new environment
-variables directly (e.g. `WEEKLY_RECIPE_LOCATION`,
-`WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS`, optionally `WEEKLY_RECIPE_MAX_COST`
-etc., plus `WEEKLY_RECIPIENT_EMAIL` and `SMTP_HOST`/`SMTP_PORT`/
+variables directly (e.g. `RECIPE_LOCATION`,
+`RECIPE_CALENDAR_LENGTH_DAYS`, optionally `RECIPE_MAX_COST`
+etc., plus `RECIPIENT_EMAIL` and `SMTP_HOST`/`SMTP_PORT`/
 `SMTP_USERNAME`/`SMTP_PASSWORD`/`SMTP_FROM_ADDRESS`) rather than adding these
 fields to `src/config.py`'s shared `Config` dataclass. The existing
 pipeline-wide variables (`EVENT_CALENDAR_MODEL`, the provider API key,

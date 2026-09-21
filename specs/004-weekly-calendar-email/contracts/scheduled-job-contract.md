@@ -1,4 +1,4 @@
-# Scheduled Job Contract: Weekly Calendar Email
+# Scheduled Job Contract: Calendar Email
 
 Unlike `contracts/cli-contract.md`, `mcp-contract.md`, or `web-contract.md`,
 this is not a contract for an interface a person or client calls — per this
@@ -12,38 +12,38 @@ the other three contracts.
 ## Entrypoint
 
 `python -m src.scheduled_job.main` (the container's `ENTRYPOINT`; also
-installed as the `calendar-weekly-email` console script for local testing,
+installed as the `calendar-scheduled-job` console script for local testing,
 matching `calendar`/`calendar-mcp`/`calendar-web`'s convention).
 
 Takes no command-line arguments and reads no stdin — all configuration is
-environment variables (data-model.md's `WeeklyRecipe` and
+environment variables (data-model.md's `Recipe` and
 `EmailDeliveryConfig`).
 
 ## Required environment variables
 
 | Variable | Required | Notes |
 |---|---|---|
-| `WEEKLY_RECIPE_LOCATION` | Yes | |
-| `WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS` | Yes | Must be a positive integer |
-| `WEEKLY_RECIPIENT_EMAIL` | Yes | |
+| `RECIPE_LOCATION` | Yes | |
+| `RECIPE_CALENDAR_LENGTH_DAYS` | Yes | Must be a positive integer |
+| `RECIPIENT_EMAIL` | Yes | |
 | `SMTP_HOST` | Yes | |
 | `SMTP_PORT` | Yes | |
 | `SMTP_FROM_ADDRESS` | Yes | |
 | `EVENT_CALENDAR_MODEL` | Yes | Same variable the CLI/MCP/web already require |
 | A provider API key (e.g. `ANTHROPIC_API_KEY`) | Yes | Same convention as the other three interfaces |
-| `WEEKLY_RECIPE_MAX_COST` | No | |
-| `WEEKLY_RECIPE_EVENT_TYPES` | No | Comma-separated |
-| `WEEKLY_RECIPE_GENRES` | No | Comma-separated |
-| `WEEKLY_RECIPE_START_AFTER` / `WEEKLY_RECIPE_START_BEFORE` | No | Both-or-neither, `HH:MM` |
+| `RECIPE_MAX_COST` | No | |
+| `RECIPE_EVENT_TYPES` | No | Comma-separated |
+| `RECIPE_GENRES` | No | Comma-separated |
+| `RECIPE_START_AFTER` / `RECIPE_START_BEFORE` | No | Both-or-neither, `HH:MM` |
 | `SMTP_USERNAME` / `SMTP_PASSWORD` | No | Both-or-neither in practice; required by most real SMTP relays |
 | `TAVILY_API_KEY` | No | Same fallback-only semantics as the other three interfaces |
 | `EVENT_CALENDAR_TRUSTED_SOURCES` | No | Defaults the same way as the other interfaces; in the deployed image this points at the trusted-source list baked in at build time (spec.md Assumption) |
 
 ## Behavior
 
-1. Build `WeeklyRecipe` and `EmailDeliveryConfig` from the environment
+1. Build `Recipe` and `EmailDeliveryConfig` from the environment
    (data-model.md). A missing required variable or an invalid recipe
-   (non-positive `WEEKLY_RECIPE_CALENDAR_LENGTH_DAYS`, an incomplete
+   (non-positive `RECIPE_CALENDAR_LENGTH_DAYS`, an incomplete
    start-window pair) is treated as a run failure — go directly to step 4
    with a validation-error message; no pipeline call is attempted.
 2. Run the pipeline: `discover_events` → `dedup.dedup_events` →
@@ -54,7 +54,7 @@ environment variables (data-model.md's `WeeklyRecipe` and
    `MissingConfigError`, or any other unanticipated exception
    (research.md #5) — build the failure email instead.
 5. Send exactly one email (step 3's or step 4's) via SMTP to
-   `WEEKLY_RECIPIENT_EMAIL`. Sending itself failing (e.g. bad SMTP
+   `RECIPIENT_EMAIL`. Sending itself failing (e.g. bad SMTP
    credentials) is logged and raises — there is no second delivery channel
    to fall back to; this is a genuine unrecoverable run failure, surfaced
    through the process exit code below since no email could be sent to
