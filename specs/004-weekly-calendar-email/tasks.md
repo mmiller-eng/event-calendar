@@ -43,7 +43,7 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Implement `Recipe` and `EmailDeliveryConfig` construction from environment variables in `src/scheduled_job/recipe.py`, including validation (positive `calendar_length_days`, complete `RECIPE_START_AFTER`/`RECIPE_START_BEFORE` pair) — a validation failure is treated as a run failure, not raised to a caller (data-model.md; contracts/scheduled-job-contract.md step 1)
+- [x] T005 [P] Implement `Recipe` and `EmailDeliveryConfig` construction from environment variables in `src/scheduled_job/recipe.py`, including validation (positive `calendar_length_days`, complete `RECIPE_START_AFTER`/`RECIPE_START_BEFORE` pair) — a validation failure is treated as a run failure, not raised to a caller (data-model.md; contracts/scheduled-job-contract.md step 1)
 - [ ] T006 [P] Implement `RunOutcome` → subject/body mapping (the three email shapes: events found, zero events, failure) and SMTP sending via `smtplib`/`email.message.EmailMessage` in `src/scheduled_job/email_delivery.py` (data-model.md `RunOutcome`; contracts/scheduled-job-contract.md's Email content contract)
 - [ ] T007 Implement `src/scheduled_job/main.py`'s entrypoint: build the recipe/config via T005 (catching its validation failures), wrap the pipeline call in `try`/`except` for `DiscoveryUnavailableError`/`MissingConfigError`, always call `email_delivery.send(...)` (T006) exactly once, exit `0`/non-zero per contracts/scheduled-job-contract.md step 6; includes `main()`/`if __name__ == "__main__"` for the `calendar-scheduled-job` console script (depends on T005, T006) — the actual pipeline call itself is wired in T010 (US1)
 
