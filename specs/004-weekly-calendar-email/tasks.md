@@ -28,7 +28,7 @@ Per plan.md's Structure Decision: a new sibling package `src/scheduled_job/` (al
 
 **Purpose**: Project initialization for the new package and its container packaging
 
-- [ ] T001 Create `src/scheduled_job/__init__.py` and empty `src/scheduled_job/main.py`, `src/scheduled_job/recipe.py`, `src/scheduled_job/email_delivery.py`
+- [x] T001 Create `src/scheduled_job/__init__.py` and empty `src/scheduled_job/main.py`, `src/scheduled_job/recipe.py`, `src/scheduled_job/email_delivery.py`
 - [ ] T002 Add a `calendar-weekly-email = "src.scheduled_job.main:main"` entry under `[project.scripts]` in `pyproject.toml` — no new Python dependencies needed, email delivery uses the standard library (research.md #3)
 - [ ] T003 [P] Create a `Dockerfile` at the repo root: `python:3.11-slim` base, installs the project, `ENTRYPOINT ["python", "-m", "src.scheduled_job.main"]`, no exposed port (research.md #2; contracts/scheduled-job-contract.md)
 - [ ] T004 [P] Confirm the existing root `[tool.ruff]` config in `pyproject.toml` already covers `src/scheduled_job/` (it should, via the existing `src*` package include)
